@@ -61,7 +61,8 @@ def keepass_request(profile: dict[str, str], request: dict[str, Any]) -> dict[st
     auth: dict[str, str] = {"mode": profile["keepass_auth_mode"]}
     if profile["keepass_auth_target"]:
         auth["target"] = profile["keepass_auth_target"]
-    command = [profile["keepass_wrapper"], "--config", profile["keepass_config"]]
+    wrapper = Path(profile["keepass_wrapper"])
+    command = [sys.executable, str(wrapper), "--config", profile["keepass_config"]] if wrapper.suffix.lower() == ".py" else [str(wrapper), "--config", profile["keepass_config"]]
     result = subprocess.run(command, input=json.dumps({"version": 1, **request, "auth": auth}, ensure_ascii=False), text=True, capture_output=True, check=False, timeout=float(profile["timeout_seconds"]))
     if result.returncode != 0:
         fail("keepass_error", "A KeePassVault recusou a solicitação.")
